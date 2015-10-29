@@ -1,4 +1,38 @@
 /**
+*   Question 1
+*/
+% Import the g&s files.
+:- ensure_loaded('wn_s').
+:- ensure_loaded('wn_g').
+
+% The id in s/6, where S is, and the id in g/2 match, all the definitons of S will be given as outputs.
+% Works the same if you specified what G is and want to find out its word. 
+
+definition(S, G) :- s(_id,_,S,_,_,_), g(_id, G). 
+
+/*
+Output:
+?- definition('hello', G).
+G = 'an expression of greeting; "every morning they exchanged polite hellos"'.
+
+?- definition('discipula', G).
+false.
+
+?- definition('hypernym', G).
+G = 'a word that is more generic than a given word'.
+
+?- definition(S, 'a plant or animal that is atypically small').
+S = dwarf ;
+false.
+
+?- definition('nutrient', G).
+G = 'any substance that can be metabolized by an animal to give energy and build tissue' ;
+G = 'any substance (such as a chemical element or inorganic compound) that can be taken in by a green plant and used in organic synthesis' ;
+G = 'of or providing nourishment; "good nourishing stew"'.
+
+
+
+/**
 *   Question 2
 */
 
@@ -15,6 +49,47 @@ word_line_morphs :-
     read(X),
     morph_atoms_bag(X,Y), 
     write(Y).
+	
+/**
+*   Question 3
+*/
+
+%Please look into '312-pess.l' and '312-pess-grammar.pl' and mark the parts labelled Part 3
+	
+/* Output:
+?- n(thing).
+true.
+
+?- v(lift).
+true.
+
+?- adj(late).
+true.
+
+?- n(project).
+true.
+
+?- adv(silly).
+true.
+
+?- adj(tired).
+true.
+
+?- n(tired). %tired is not a noun
+false.
+
+?- n(instructor).
+true.
+
+?- n(student). %student not in vocab.kb
+false.
+
+?- adj(last).
+true.
+
+?- n(word).
+true.
+*/
 
 
 /**
