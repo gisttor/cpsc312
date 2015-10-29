@@ -1,3 +1,18 @@
+/* Team information
+Student #1, Name:
+Student #1, Student #:
+Student #1, ugrad ID:
+
+Student #2, Name:
+Student #2, Student #:
+Student #2, ugrad ID:
+
+Student #3, Name: Chun-Wei Yen
+Student #3, Student #: 33425125
+Student #3, ugrad ID: s2u9a
+*/
+
+
 /**
 *   Question 1
 */
@@ -54,7 +69,15 @@ word_line_morphs :-
 *   Question 3
 */
 
-%Please look into '312-pess.l' and '312-pess-grammar.pl' and mark the parts labelled Part 3
+%Please look into '312-pess.l' and '312-pess-grammar.pl' and mark the parts labelled Part 3 as the following:
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%% Part 3 %%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+%somecode
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Part 3 - end %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
 	
 /* Output:
 ?- n(thing).
