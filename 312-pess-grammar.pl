@@ -191,6 +191,49 @@ rule(Rules) -->
         { build_rules([], Head, Rules) }.    % That's a fact! No body.
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%% Part 3 %%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%% grammar for parsing vocabulary %%%%%%%%%%%%%%%%%%%
+
+% List of vocabulary definitions with and between each.
+word([First|Rest]) -->
+    single_word(First), [and], word(Rest).
+
+% List of vocabulary definitions without and between each.
+word([First|Rest]) -->
+    single_word(First), word(Rest).
+
+% Single vocabulary definition (base of reqursion above).
+word([Words]) -->
+    single_word(Words).
+
+% Vocabulary definition with isA between word and type.
+single_word(Words) -->
+    [X], isA, [Y], 
+    {build_vocab(X,Y,Words)}, !.
+
+% Vocabulary definition without isA between word and type.
+single_word(Words) -->
+    [X], [Y],
+    {build_vocab(X,Y,Words)}, !.
+
+build_vocab(X, noun, n(X)).
+build_vocab(X, verb, v(X)).
+build_vocab(X, adjective, adj(X)).
+build_vocab(X, adverb, adv(X)).
+
+% isA: 'is a', 'is an', or just 'is'.
+isA -->
+    [is], ind.
+
+ind --> [a]; [an]; [].
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Part 3 - end %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+
 % 1 or more sentences joined by ands.
 sentence_conj_plus(Attrs) -->
         sentence(First), [and],

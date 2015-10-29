@@ -349,6 +349,19 @@ process(['rule:'|L]) :-     % Found a rule.
         rule(R,L,[]),       % Parse the rule.
         bug(R),             % Print it for debugging.
         assert_rules(R), !. % Assert it (them, potentially) in the DB.
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%% Part 3 %%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+process(['words:'|L]) :-    % Found words
+    word(W,L,[]),   % Parse words
+    bug(W),       % Print for debugging
+    assert_rules(W), !. % Assert words.
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Part 3 - end %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+
 process(L) :-
         write('trans error on:'),nl,
         write(L),nl.
