@@ -182,9 +182,12 @@ true.
 
 /**
 *   Question 4
+*
+* Simplifies the rule and attribute structure to be more human-readable. This
+* includes simplifying attr/3 to attr/2 by enlisting function between
+* attribute. Rules with an empty body are simplified to a fact and list
+* encapsulation is removed for lists of length 1.
 */
-% Convert attr/3 to attr/2 and recursively parse the additional attribute (Z
-% list)
 % attr(X,Y,[]) -> X(Y)
 simplify_attr(attr(X,Y,[]), O) :- !, parse_xy(X,Y,O).
 % attr(X,Y,Z) -> attr(X(Y),Z)
