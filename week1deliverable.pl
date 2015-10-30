@@ -1,7 +1,7 @@
 /* Team information
-Student #1, Name:
-Student #1, Student #:
-Student #1, ugrad ID:
+Student #1, Name: Kelvin Yip
+Student #1, Student #: 18016121
+Student #1, ugrad ID: s8u8
 
 Student #2, Name: Gisli Thor Thordarson
 Student #2, Student #: 73996150
