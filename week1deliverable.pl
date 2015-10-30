@@ -21,7 +21,6 @@ word_line_morphs :-
 *   Question 4
 */
 
-% Convert attr/3 to attr/2 and parse the Z list
 simplify_attr(attr(X,Y,[]), O) :- !, parse_xy(X,Y,O).
 simplify_attr(attr(X,Y,Z), attr(O,W)) :- Z\=[],!,parse_xy(X,Y,O), parse_z(Z,W).
 simplify_attr(rule(H,[]), fact(A)) :- simplify_attr(H, A), !.
@@ -41,13 +40,14 @@ parse_xy(X,Y,A) :- functor(A,X,1), arg(1,A,Y).
 * - attr(_,_)       single attr/2 (not a list)
 * - [attr(_,_)...]  list of attr/2
 */
+
 parse_z([attr(X,Y,[])], O) :-       % 4 cases: 2 for inner z empty and non-empty
     !, parse_xy(X,Y,O).             % outer empty (remove bracket) and non-empty
-parse_z([attr(X,Y,[])|Xs], [O|Zs]) :-
+parse_z([attr(X,Y,[])|Xs], [O,Zs]) :-
     !, parse_xy(X,Y,O), parse_z(Xs,Zs).
 parse_z([attr(X,Y,Z)], attr(O,W)) :-
     Z\=[],!, parse_xy(X,Y,O), parse_z(Z,W).
-parse_z([attr(X,Y,Z)|Xs], [attr(O,W)|Zs]) :-
+parse_z([attr(X,Y,Z)|Xs], [attr(O,W),Zs]) :-
     Z\=[],!, parse_xy(X,Y,O), parse_z(Z,W), parse_z(Xs,Zs).
 
 /*
@@ -57,3 +57,5 @@ parse_z([attr(X,Y,Z)|Xs], [attr(O,W)|Zs]) :-
 * A = fact(attr(does(eats), [is_how(slowly)|attr(is_a(insects), is_like(large))])).
 *
 */
+
+
