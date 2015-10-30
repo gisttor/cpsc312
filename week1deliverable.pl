@@ -19,9 +19,9 @@ Student #3, ugrad ID: s2u9a
 :- ensure_loaded('wn_s').
 :- ensure_loaded('wn_g').
 
-% If the id in s/6, where S is, and the id in g/2 match, all the definitons of S will be given as outputs.
-% Works the same if you specified what G is and want to find out its word. 
-
+% Joins the synset information with the gloss by synset_ID. All the definitons
+% of S will be given as outputs. Works the same if you specified what G is and
+% want to find out its word.
 definition(S, G) :- s(_id,_,S,_,_,_), g(_id, G). 
 
 /*
@@ -59,9 +59,31 @@ G = 'of or providing nourishment; "good nourishing stew"'.
 *
 */
 word_line_morphs :- 
-    read(X),
-    morph_atoms_bag(X,Y), 
-    write(Y).
+    read(X),                % read input word from the user
+    morph_atoms_bag(X,Y),   % call the PronTO_Morph moduule
+    write(Y).               % write out the definition
+
+/* Sample Output
+*
+
+?- word_line_morphs.
+|: hating.
+[[[hating]],[[hate,-ing]],[[hat,-ing]]]
+true.
+
+?- word_line_morphs.
+|: says.
+[[[says]],[[say,-s]]]
+true.
+
+?- word_line_morphs.
+|: triples.
+[[[triples]],[[tripl,-pl]],[[triplis,-pl]],[[triple,-s]]]
+true.
+
+*
+*/
+
 
 /**
 *   Question 3
@@ -161,13 +183,17 @@ true.
 /**
 *   Question 4
 */
-
-% Convert attr/3 to attr/2 and parse the Z list
+% Convert attr/3 to attr/2 and recursively parse the additional attribute (Z
+% list)
+% attr(X,Y,[]) -> X(Y)
 simplify_attr(attr(X,Y,[]), O) :- !, parse_xy(X,Y,O).
+% attr(X,Y,Z) -> attr(X(Y),Z)
 simplify_attr(attr(X,Y,Z), attr(O,W)) :- Z\=[],!,parse_xy(X,Y,O), parse_z(Z,W).
+% attr(rule(H), []) -> fact(H)
 simplify_attr(rule(H,[]), fact(A)) :- simplify_attr(H, A), !.
 % rule(H,B) :   H :: attr/3
 %               B :: list of attr/3
+% rule(H,[B]) -> rule(H,B).
 simplify_attr(rule(H,Z), rule(A,B)) :- Z\=[],!, simplify_attr(H,A), parse_z(Z,B).
 
 /**
@@ -177,12 +203,11 @@ simplify_attr(rule(H,Z), rule(A,B)) :- Z\=[],!, simplify_attr(H,A), parse_z(Z,B)
 parse_xy(X,Y,A) :- functor(A,X,1), arg(1,A,Y).
 
 /**
-* Recursively parses the third attribute.
+* Recursively parses the additional list of attribute(s)
 * Output can be one of:
-* - attr(_,_)       single attr/2 (not a list)
-* - [attr(_,_)...]  list of attr/2
+* - attr(_,_) (or equivalent X(Y) form)     single attr/2 (not a list)
+* - [attr(_,_)...]                          list of attr/2
 */
-
 parse_z([attr(X,Y,[])|[]], O) :-       % 4 cases: 2 for inner z empty and non-empty
     !, parse_xy(X,Y,O).             % outer empty (remove bracket) and non-empty
 parse_z([attr(X,Y,[])|Xs], [O|Zs]) :-
