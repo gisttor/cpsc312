@@ -1,4 +1,5 @@
-/* Team information
+/**
+*   Team information
 Student #1, Name: Kelvin Yip
 Student #1, Student #: 18016121
 Student #1, ugrad ID: s8u8
@@ -44,7 +45,7 @@ false.
 G = 'any substance that can be metabolized by an animal to give energy and build tissue' ;
 G = 'any substance (such as a chemical element or inorganic compound) that can be taken in by a green plant and used in organic synthesis' ;
 G = 'of or providing nourishment; "good nourishing stew"'.
-
+*/
 
 
 /**
@@ -123,7 +124,7 @@ isA -->
 ind --> [a]; [an]; [].
 */
 
-/* The vocabulary is in vocab.kb. To load the vocabulary, run load_rules('vocab.kb').
+% The vocabulary is in vocab.kb. To load the vocabulary, run load_rules('vocab.kb').
 	
 /* Output:
 ?- n(thing).
