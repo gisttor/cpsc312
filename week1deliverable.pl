@@ -3,9 +3,9 @@ Student #1, Name:
 Student #1, Student #:
 Student #1, ugrad ID:
 
-Student #2, Name:
-Student #2, Student #:
-Student #2, ugrad ID:
+Student #2, Name: Gisli Thor Thordarson
+Student #2, Student #: 73996150
+Student #2, ugrad ID: m8j0b
 
 Student #3, Name: Chun-Wei Yen
 Student #3, Student #: 33425125
@@ -69,7 +69,7 @@ word_line_morphs :-
 *   Question 3
 */
 
-%Please look into '312-pess.l' and '312-pess-grammar.pl' and mark the parts labelled Part 3 as the following:
+% The code for question 3 is in '312-pess.pl' and '312-pess-grammar.pl' marked as the following:
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% Part 3 %%%%%%%%%
@@ -78,6 +78,52 @@ word_line_morphs :-
 %%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% Part 3 - end %%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%
+
+/* Addition to '312-pess.pl' (lines 356 - 359):
+process(['words:'|L]) :-    % Found words
+    word(W,L,[]),   % Parse words
+    bug(W),       % Print for debugging
+    assert_rules(W), !. % Assert words.
+
+
+Addition to '312-pess-grammer.pl' (lines 197 - 230):
+%%%%%%%%%%%%%%%%%%% grammar for parsing vocabulary %%%%%%%%%%%%%%%%%%%
+
+% List of vocabulary definitions with and between each.
+word([First|Rest]) -->
+    single_word(First), [and], word(Rest).
+
+% List of vocabulary definitions without and between each.
+word([First|Rest]) -->
+    single_word(First), word(Rest).
+
+% Single vocabulary definition (base of reqursion above).
+word([Words]) -->
+    single_word(Words).
+
+% Vocabulary definition with isA between word and type.
+single_word(Words) -->
+    [X], isA, [Y], 
+    {build_vocab(X,Y,Words)}, !.
+
+% Vocabulary definition without isA between word and type.
+single_word(Words) -->
+    [X], [Y],
+    {build_vocab(X,Y,Words)}, !.
+
+build_vocab(X, noun, n(X)).
+build_vocab(X, verb, v(X)).
+build_vocab(X, adjective, adj(X)).
+build_vocab(X, adverb, adv(X)).
+
+% isA: 'is a', 'is an', or just 'is'.
+isA -->
+    [is], ind.
+
+ind --> [a]; [an]; [].
+*/
+
+/* The vocabulary is in vocab.kb. To load the vocabulary, run load_rules('vocab.kb').
 	
 /* Output:
 ?- n(thing).
