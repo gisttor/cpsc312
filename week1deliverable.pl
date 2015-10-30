@@ -1,5 +1,4 @@
-/**
-*   Team information
+/* Team information
 Student #1, Name: Kelvin Yip
 Student #1, Student #: 18016121
 Student #1, ugrad ID: s8u8
@@ -13,7 +12,6 @@ Student #3, Student #: 33425125
 Student #3, ugrad ID: s2u9a
 */
 
-
 /**
 *   Question 1
 */
@@ -21,7 +19,7 @@ Student #3, ugrad ID: s2u9a
 :- ensure_loaded('wn_s').
 :- ensure_loaded('wn_g').
 
-% The id in s/6, where S is, and the id in g/2 match, all the definitons of S will be given as outputs.
+% If the id in s/6, where S is, and the id in g/2 match, all the definitons of S will be given as outputs.
 % Works the same if you specified what G is and want to find out its word. 
 
 definition(S, G) :- s(_id,_,S,_,_,_), g(_id, G). 
@@ -47,7 +45,6 @@ G = 'any substance (such as a chemical element or inorganic compound) that can b
 G = 'of or providing nourishment; "good nourishing stew"'.
 */
 
-
 /**
 *   Question 2
 */
@@ -65,7 +62,7 @@ word_line_morphs :-
     read(X),
     morph_atoms_bag(X,Y), 
     write(Y).
-	
+
 /**
 *   Question 3
 */
@@ -80,14 +77,14 @@ word_line_morphs :-
 %%%%% Part 3 - end %%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%
 
-/* Addition to '312-pess.pl' (lines 356 - 359):
+%Addition to '312-pess.pl' (lines 356 - 359):
 process(['words:'|L]) :-    % Found words
     word(W,L,[]),   % Parse words
     bug(W),       % Print for debugging
     assert_rules(W), !. % Assert words.
 
 
-Addition to '312-pess-grammer.pl' (lines 197 - 230):
+%Addition to '312-pess-grammer.pl' (lines 197 - 230):
 %%%%%%%%%%%%%%%%%%% grammar for parsing vocabulary %%%%%%%%%%%%%%%%%%%
 
 % List of vocabulary definitions with and between each.
@@ -122,9 +119,9 @@ isA -->
     [is], ind.
 
 ind --> [a]; [an]; [].
-*/
 
-% The vocabulary is in vocab.kb. To load the vocabulary, run load_rules('vocab.kb').
+
+%The vocabulary is in vocab.kb. To load the vocabulary, run load_rules('vocab.kb').
 	
 /* Output:
 ?- n(thing).
@@ -161,7 +158,6 @@ true.
 true.
 */
 
-
 /**
 *   Question 4
 */
@@ -186,19 +182,24 @@ parse_xy(X,Y,A) :- functor(A,X,1), arg(1,A,Y).
 * - attr(_,_)       single attr/2 (not a list)
 * - [attr(_,_)...]  list of attr/2
 */
-parse_z([attr(X,Y,[])], O) :-       % 4 cases: 2 for inner z empty and non-empty
+
+parse_z([attr(X,Y,[])|[]], O) :-       % 4 cases: 2 for inner z empty and non-empty
     !, parse_xy(X,Y,O).             % outer empty (remove bracket) and non-empty
 parse_z([attr(X,Y,[])|Xs], [O|Zs]) :-
     !, parse_xy(X,Y,O), parse_z(Xs,Zs).
-parse_z([attr(X,Y,Z)], attr(O,W)) :-
+parse_z([attr(X,Y,Z)|[]], [attr(O,W)|[]]) :-
     Z\=[],!, parse_xy(X,Y,O), parse_z(Z,W).
 parse_z([attr(X,Y,Z)|Xs], [attr(O,W)|Zs]) :-
     Z\=[],!, parse_xy(X,Y,O), parse_z(Z,W), parse_z(Xs,Zs).
 
 /*
-* Sample output:
-*
-* ?- simplify_attr(rule(attr(does,eats,[attr(is_how,slowly,[]),attr(is_a,insects,[attr(is_like,large,[])])]),[]),A).
-* A = fact(attr(does(eats), [is_how(slowly)|attr(is_a(insects), is_like(large))])).
-*
+Output:
+?- simplify_attr(rule(attr(does,eats,[attr(is_how,slowly,[]),attr(is_a,insects,[attr(is_like,large,[])])]),[]),A).
+A = fact(attr(does(eats), [is_how(slowly), attr(is_a(insects), is_like(large))])).
+
+?- simplify_attr(rule(attr(does,eats,[attr(is_how,slowly,[]),attr(a,b,[]),attr(a,b,[]),attr(is_a,insects,[attr(is_like,large,[])])]),[]),A).
+A = fact(attr(does(eats), [is_how(slowly), a(b), a(b), attr(is_a(insects), is_like(large))])).
 */
+
+
+
