@@ -362,6 +362,22 @@ process(['words:'|L]) :-    % Found words
 %%%%% Part 3 - end %%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%% Main q3 %%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Process goals and set it as the top-goal. Retract any other top-goal from the
+    % database
+process(['goal:'|L]) :-     % Found a goal
+        goal(G,L,[]),       % Parse the goal
+        bug(G),             % Print it for debugging.
+        retractall(rule(top_goal(_), _)), % Retract any other top goal
+        assert_rules(G), !. % Assert it (them, potentially) in the DB.
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Main q3  end %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+%
 process(L) :-
         write('trans error on:'),nl,
         write(L),nl.

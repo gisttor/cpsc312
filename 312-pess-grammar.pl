@@ -94,7 +94,8 @@ read_word_to(Stop, [C|Cs]) :- get_char(C), read_word_to(Stop, Cs).
 read_word([]) :- peek_char(Ch), char_type(Ch, space), !.
 read_word([]) :- peek_char(Ch), Ch = '.', !.
 read_word([]) :- peek_char(Ch), char_type(Ch, end_of_file), !.
-read_word([Ch|Chs]) :- get_char(Ch), read_word(Chs).
+% convert to lower case when reading char
+read_word([Lc|Chs]) :- get_char(Ch),downcase_atom(Ch,Lc), read_word(Chs).
 
 
 
@@ -158,6 +159,9 @@ try_parse :- try_parse(P),
 
 % Debugging predicate for quick test parsing of a rule.
 try_parse(P) :- read_sentence(Sent), rule(P, Sent, []).
+
+% Debugging predicate for quick test parsing of a goal.
+try_goal(P) :- read_sentence(Sent), goal(P, Sent, []).
 
 %% A sample parsed sentence for testing.  Should mean:
 %% It very slowly and carefully eats languidly flying very very 
@@ -232,6 +236,144 @@ ind --> [a]; [an]; [].
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% Part 3 - end %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%% Main q3 %%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Load ProNTo_Morph module
+:- ensure_loaded('Schlachter/pronto_morph_engine').
+
+% Converts the base form verb (Base) to the doing form, as it's given in v(X),
+% using the ProNTo Morph engine.
+% Intended to be used with Base ground and Doing unground
+% Search all the verbs and match if they have a [Base,-s] morpheme
+baseToDoingVerb(Base,Doing) :- v(Doing), morph_atoms(Doing, [[Base, -s]]).
+
+% Optional usage for "the hell" or "the heck"
+opt_the_hell --> [].
+opt_the_hell --> [the,hell];[the,heck].
+
+% Goals can be
+goal(Goal) --> % what is it
+        % Optional "the hell/the heck" usage for bonus
+        % "that" is added to np([]) vocab below.
+        % read_sentence translates input to all lower case above
+        % in read_word/1
+        [what], opt_the_hell, vis, np([]),
+        { build_goal(X, [attr(is_a, X, [])], Goal) }, !.
+    % answer to goal is the "it"
+    % ?- process(['goal:',what,is,it]).
+    % Understood: [rule(top_goal(_G2216),[attr(is_a,_G2216,[])])]
+    %
+    % ?- try_goal(X).
+    % what the heck is THAT.
+    %
+    % X = [rule(top_goal(_G393), [attr(is_a, _G393, [])])]
+
+goal(Goal) -->
+        % what does it have
+        [what, does], np([]), vhas,
+        { build_goal(X, [attr(has_a, X, [])], Goal) }, !.
+    % ?- process(['goal:',what,does,it,have]).
+    % Understood: [rule(top_goal(_G2264),[attr(has_a,_G2264,[])])]
+
+goal(Goal) --> % is it ...
+        % is it <np/adjp>
+        vis, np([]), isitqp(Body),
+        { build_goal(yes, Body, Goal) }, !.
+    % answer/goal to "is it.." is always yes or no
+    % ?- process(['goal:',is,it,a,brown,swan]).
+    % Understood: [rule(top_goal(yes),[attr(is_a,swan,[attr(is_like,brown,[])])])]
+
+goal(Goal) -->
+        % does it <vp>
+        [does], np([]), doesqp(Body,_),
+        { build_goal(yes, Body, Goal) }, !.
+    % answer/goal to "does it ..." is always yes or no
+    % ?- process(['goal:',does,it,eat,nostrils]).
+    % Understood: [rule(top_goal(yes),[attr(does,eats,[attr(is_a,nostrils,[])])])]
+
+goal(Goal) -->
+        % what does it <v (base form)>
+        [what, does], np([]), vdo([attr(does,X,[])]),
+        { build_goal(Y, [attr(does,X, [attr(is_a,Y,[])])], Goal) }, !.
+    % answer/goal to "what does it ..." is the subject of a "does" attribute
+    % ?- process(['goal:',what,does,it,scavenge]).
+    % Understood: [rule(top_goal(_G2391),[attr(does,scavenges,[attr(is_a,_G2391,[])])])]
+
+goal(Goal) -->
+        % how does it <v (base form)>
+        [how, does], np([]), vdo([attr(does,X,[])]),
+        { build_goal(Y, [attr(does,X, [attr(is_how,Y,[])])], Goal) }, !.
+    % answer to "how does it .." is the attribute belonging to is_how
+    % ?- process(['goal:',how,does,it,fly]).
+    % Understood: [rule(top_goal(_G2313),[attr(does,flies,[attr(is_how,_G2313,[])])])]
+
+goal(Goal) -->
+        % what is the <np> like
+        %
+        % If the np includes an is_like relation, like flying toe, we take it to
+        % describe the toe, other than that it's flying. i.e., flying would not be
+        % a solution as below (unless if there's somehow two is_like attributes)
+        [what], vis, np(NP), [like],
+        { build_prepend_attrs(NP,[attr(is_like,Y,[])], LikeTerm), build_goal(Y, LikeTerm, Goal) }, !.
+    % ?- process(['goal:',what,is,the,throat,like]).
+    % Understood: rule(top_goal(_G869),[attr(is_a,throat,[attr(is_like,_G869,[])])])
+    %
+    % ?- process(['goal:',what,is,the,flying,toe,like]).
+    % Understood: rule(top_goal(_G916),[attr(is_a,toe,[attr(is_like,flying,[]),attr(is_like,_G916,[])])])
+
+% Helper function that builds the goal using rule syntax.
+% top_goal(X) is the head we want to prove and
+% Y is the body (the attribute, taken as in
+build_goal(X, Y, R) :- build_rules(Y, [top_goal(X)], R).
+
+% Base for of "Doing" verbs provided below or literals
+% E.g. vdo(eat) uses v(eats) and vdo(fly) uses v(flies)
+% No translation for literal values. Assume it makes sense to use in the form
+% provided
+vdo([attr(does,Doing,[])]) --> [X], { baseToDoingVerb(X, Doing) }.
+vdo([attr(does,Name,[])]) --> lit(v, Name).
+
+%%%%%%%%%%%%%%%%%%% DOES %%%%%%%%%%%%%%%%%%
+
+doesqp(VPTerms,_) -->           % Does it has or it contains
+        vhas,
+        np_conj(NPTerms),       % The noun should be has_a, not is_a
+        { convert_to_has_a(NPTerms, VPTerms) }.
+    % Example: Does it have a toe
+
+doesqp(VPTerms, NPTerms) -->    % Does it advs verb nouns
+    % These all get translated to attr(does,verb,[_]) (vdoes)
+    adv_conj(AVTerms),          % E.g., It slowly eats worms.
+    vdo(VTerms),                % All the attached attributes just
+    np_conj(NPTerms),           % get thrown together on the verb.
+    { append(AVTerms, NPTerms, ModTerms),
+      build_prepend_attrs(VTerms, ModTerms, VPTerms) }.
+  % Example: does it very slowly eats
+
+doesqp(VPTerms, _) -->
+    vdo(VTerms),                % It verb advs.
+    adv_conj_plus(AVTerms),     % E.g., it eats slowly.
+    { build_prepend_attrs(VTerms, AVTerms, VPTerms) }.
+
+%%%%%%%%%%%%%%%%%%%% IS IT %%%%%%%%%%%%%%%%%
+
+isitqp(VPTerms) -->
+        % Is it w/adjectives.
+        adj_conj_plus(VPTerms).
+    % Example: is it external
+
+isitqp(VPTerms) -->
+        % Is it w/nouns (which can also have adjs).
+        np_conj_plus(VPTerms).
+    % Example: is it a flying toe
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Main q3 - End %%%%
 %%%%%%%%%%%%%%%%%%%%%%%%
 
 % 1 or more sentences joined by ands.
@@ -380,7 +522,7 @@ det_opt --> [a].
 det_opt --> [an].
 
 % Nouns become is_a attributes.
-n([]) --> [it].                           % "it" is ignored
+n([]) --> [it]; [that].                   % "it", "that" are ignored
 n([attr(is_a,X,[])]) --> [X], { n(X) }.   % Anything listed below.
 n([attr(is_a,Name,[])]) --> lit(n, Name). % Any literal tagged as 'n'
 
@@ -690,7 +832,6 @@ adv(ponderously).
 adv(powerfully).
 adv(agilely).
 adv(mottled).
-
 % Adjectives.
 :- dynamic(adj/1).  % Ensure that the predicate can be modified dynamically
 
