@@ -70,6 +70,10 @@ read_sent_helper([]) :- peek_char(Ch),       % Stop at a period.
 read_sent_helper(Words) :- peek_char(Ch),    % Eat whitespace
         char_type(Ch, space), !, get_char(Ch), 
         read_sent_helper(Words).
+read_sent_helper(Words) :- peek_char(Ch),    % Eat comments
+        Ch = '%', !, get_char(Ch),           % starting from %
+        discard_to_eol(),                    % to the end of line
+        read_sent_helper(Words).
 read_sent_helper([Word|Words]) :-            % Read quoted words.
         peek_char(Ch), Ch = '"', !,
         read_word_to(ChWord), 
@@ -79,6 +83,9 @@ read_sent_helper([Word|Words]) :-            % Read unquoted words.
         read_word(ChWord), 
         atom_chars(Word, ChWord), 
         read_sent_helper(Words).
+
+% Read and discard everything until end of line
+discard_to_eol() :- read_word_to('\n', _).
 
 % Read a word taking the next character read as a delimiter.
 % For example, if the input is "|hello world! 'what's new?| with you?"
