@@ -287,7 +287,7 @@ goal(Goal) -->
     % ?- process(['goal:',what,does,it,have]).
     % Understood: [rule(top_goal(_G2264),[attr(has_a,_G2264,[])])]
 
-goal(Goal) --> % is it ...
+goal(Goal) -->
         % is it <np/adjp>
         vis, np([]), isitqp(Body),
         { build_goal(yes, Body, Goal) }, !.
@@ -297,7 +297,7 @@ goal(Goal) --> % is it ...
 
 goal(Goal) -->
         % does it <vp>
-        [does], np([]), doesqp(Body,_),
+        [does], np([]), doesqp(Body),
         { build_goal(yes, Body, Goal) }, !.
     % answer/goal to "does it ..." is always yes or no
     % ?- process(['goal:',does,it,eat,nostrils]).
@@ -347,13 +347,13 @@ vdo([attr(does,Name,[])]) --> lit(v, Name).
 
 %%%%%%%%%%%%%%%%%%% DOES %%%%%%%%%%%%%%%%%%
 
-doesqp(VPTerms,_) -->           % Does it has or it contains
+doesqp(VPTerms) -->           % Does it has or it contains
         vhas,
         np_conj(NPTerms),       % The noun should be has_a, not is_a
         { convert_to_has_a(NPTerms, VPTerms) }.
     % Example: Does it have a toe
 
-doesqp(VPTerms, NPTerms) -->    % Does it advs verb nouns
+doesqp(VPTerms) -->    % Does it advs verb nouns
     % These all get translated to attr(does,verb,[_]) (vdoes)
     adv_conj(AVTerms),          % E.g., It slowly eats worms.
     vdo(VTerms),                % All the attached attributes just
@@ -362,7 +362,7 @@ doesqp(VPTerms, NPTerms) -->    % Does it advs verb nouns
       build_prepend_attrs(VTerms, ModTerms, VPTerms) }.
   % Example: does it very slowly eats
 
-doesqp(VPTerms, _) -->
+doesqp(VPTerms) -->
     vdo(VTerms),                % It verb advs.
     adv_conj_plus(AVTerms),     % E.g., it eats slowly.
     { build_prepend_attrs(VTerms, AVTerms, VPTerms) }.
