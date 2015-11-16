@@ -346,6 +346,7 @@ load_rules :- !.            % Cut avoids backtracking (and re-processing!)
 % files, I might do it by writing extra process clauses below.
 process([]) :- !.           % Ignore empty rules.
 process(['rule:'|L]) :-     % Found a rule.
+        write(L),
         rule(R,L,[]),       % Parse the rule.
         bug(R),             % Print it for debugging.
         assert_rules(R), !. % Assert it (them, potentially) in the DB.
@@ -404,14 +405,70 @@ bug(X) :- write(X).
 %% 312pess-grammar.pl (which allows that file to run independently of
 %% 312pess.pl).
 
+
+%%%%%%%%%% Q4 %%%%%%%%%%%%%%%%
 goal :-
   write('Enter the new goal, followed by a period: '),
   read_sentence(Y),
   process(['goal:'|Y]).
 
+%%%%%%%%%% Q5 %%%%%%%%%%%%%%%%
 new_rule :-
   write('Enter a new rule, followed by a period: '),
   read_sentence(Y),
   process(['rule:'|Y]).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%      Main- Q2: main (based on Amzi's Clam shell)    %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+main :-
+greeting,
+repeat, 
+write('> '), 
+read(X), 
+do(X), 
+X == quit.
+
+greeting :-
+write('This is the CPSC312 Prolog Expert System Shell.'), nl,
+write('Based on Amzi''s "native Prolog shell".'), nl,
+write('Type help. load. solve. or quit.'), nl,
+write('at the prompt. Notice the period after each command!'), nl.
+
+do(load):-
+write('Enter file name in single quotes, followed by a period'), nl,
+write('(e.g ''bird.kb''.):'), nl,
+read(F),
+load_rules(F),!.
+
+do(solve):- solve,!.
+
+do(help):-
+write('Type help. load. solve. or quit.'), nl,
+write('at the prompt. Notice the period after each command!'),nl,!.
+
+do(quit).
+
+do(X):-
+write(X),
+write(' is not a legal command.'), nl,
+fail.
+
+
+%%%%%%%%%%%%%%%%% BONUS Q2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Lists all the rules that are loaded in the form rule(X,Y) and use the
+% predicate bug to print them out in natural language.
+list :- current_predicate(rule/2), !, findall(rule(X,Y), rule(X,Y), Z), ls(Z), !.
+list :- write('There are no rules loaded').
+
+% Recursively calls bug on each element of the list
+ls([]).
+ls([Z|Zs]) :- bug([Z]), ls(Zs).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                   End of Main- Q2                   %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
