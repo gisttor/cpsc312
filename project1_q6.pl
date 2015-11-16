@@ -7,14 +7,15 @@
 :- ensure_loaded('wn_s').
 :- ensure_loaded('wn_g').
 
-% (q6 main function) if you input a word into the program, (1) it will first produce a list of all the stems. 
+% (q6 main function- addword) if you input a word into the program, (1) it will first produce a list of all the stems. 
 % The second step is that it will go through the list of stems and produce a list of 
-% stems with all their parts of speech. In the last step, I will just have to assert 
-% everything in the list.
+% stems with all their parts of speech. In the last step, the function asserts 
+% everything in the list, and return the list as well.
 
 addword(_word,_listofstemswithpartofspeech):-
 allstems(_word,_stemlist),
-allstemswithpartofspeech(_stemlist,_listofstemswithpartofspeech).
+allstemswithpartofspeech(_stemlist,_listofstemswithpartofspeech),
+assert_all(_listofstemswithpartofspeech).
 
 
 % (step1.main) get all the possible stems from a word without extra parts.
@@ -41,7 +42,7 @@ parse_list(W,[H|T],[A|T2]):-
 build_vocab(W, H, A).
 parse_list(W,T,T2),!.
 
-% convert word and its part of speech into the form partofspeech(X).
+% (helper) convert word and its part of speech into the form partofspeech(X).
 build_vocab(X, n, n(X)).
 build_vocab(X, v, v(X)).
 build_vocab(X, adj, adj(X)).
@@ -69,9 +70,10 @@ append(L,Acc,L2),
 allstemswithpartofspeech(T,Acc),!.
 
 % (step3. main) asserting all the elements of the list to expand the vocabulary
+assert_all([]).
 assert_all([H|T]):-
 assert(H),
-assert_all(T),!.
+assert_all(T).
 
 
 
