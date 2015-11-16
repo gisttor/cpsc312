@@ -390,9 +390,9 @@ assert_rules([R|Rs]) :- assertz(R), assert_rules(Rs).
 % Also establishes the default top goal (to find out what "it" is).
 clear_db :-
         abolish(rule,2),
-        dynamic(rule/2),
+        dynamic(rule/2).
         %% For now, top_goal is set manually.
-        assertz(rule(top_goal(X), [attr(is_a, X, [])])).
+        %% assertz(rule(top_goal(X), [attr(is_a, X, [])])).
 
 % Gloss a rule for debugging output.
 bug(X) :- write('Understood: '), 
@@ -419,8 +419,7 @@ X == quit.
 greeting :-
 write('This is the CPSC312 Prolog Expert System Shell.'), nl,
 write('Based on Amzi''s "native Prolog shell".'), nl,
-write('Type help. load. solve. or quit.'), nl,
-write('at the prompt. Notice the period after each command!'), nl.
+do(help).
 
 do(load):-
 write('Enter file name in single quotes, followed by a period'), nl,
@@ -431,30 +430,53 @@ load_rules(F),!.
 do(solve):- solve,!.
 
 do(help):-
-write('Type help. load. solve. or quit.'), nl,
+write('Enter the command: help. load. solve. goal. new_rule. list. or quit.'), nl,
 write('at the prompt. Notice the period after each command!'),nl,!.
 
 do(quit).
 
-do(X):-
-write(X),
-write(' is not a legal command.'), nl,
-fail.
+%%%%%%%%%% Q4 %%%%%%%%%%%%%%%%
+do(goal) :-
+  write('Enter the new goal, followed by a period: '),
+  read_sentence(Y),
+  process(['goal:'|Y]),!.
 
+%%%%%%%%%% Q5 %%%%%%%%%%%%%%%%
+do(new_rule) :-
+  write('Enter a new rule, followed by a period: '),
+  read_sentence(Y),
+  process(['rule:'|Y]),!.
 
-%%%%%%%%%%%%%%%%% BONUS Q2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% BONUS Q2 %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Lists all the rules that are loaded in the form rule(X,Y) and use the
-% predicate bug to print them out in natural language.
-list :- current_predicate(rule/2), !, findall(rule(X,Y), rule(X,Y), Z), ls(Z), !.
-list :- write('There are no rules loaded').
+% Lists all the rules that are loaded in the form rule(X,Y) and prints it out
+% in natural language. If there are no rules, print out "There are no rules
+% loaded". If there is, then find and print them all
+%
+% It checks to see if rule/2 is defined and if there are any rules loaded.
+% Trying to query rule(_,_) when the predicate is not defined will result in an
+% error.
+do(list) :- current_predicate(rule/2), rule(_,_), !, findall(rule(X,Y),
+rule(X,Y), Z), ls(Z), !.
+do(list) :- write('There are no rules loaded'), nl, !.
 
 % Recursively calls bug on each element of the list
 ls([]).
-ls([Z|Zs]) :- bug([Z]), ls(Zs).
+ls([Z|Zs]) :- print_rule([Z]), ls(Zs).
+
+print_rule(X) :- write('Rule: '),
+        plain_gloss(X, Text),
+        write_sentence(Text), nl.
+
+%%%%%%%%%%%%%%% END BONUS 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+:- discontiguous do/1.
+do(X):-
+    write(X),
+    write(' is not a legal command.'), nl,
+    fail.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%                   End of Main- Q2                   %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
