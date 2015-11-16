@@ -405,19 +405,6 @@ bug(X) :- write(X).
 %% 312pess-grammar.pl (which allows that file to run independently of
 %% 312pess.pl).
 
-
-%%%%%%%%%% Q4 %%%%%%%%%%%%%%%%
-goal :-
-  write('Enter the new goal, followed by a period: '),
-  read_sentence(Y),
-  process(['goal:'|Y]).
-
-%%%%%%%%%% Q5 %%%%%%%%%%%%%%%%
-new_rule :-
-  write('Enter a new rule, followed by a period: '),
-  read_sentence(Y),
-  process(['rule:'|Y]).
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%      Main- Q2: main (based on Amzi's Clam shell)    %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -449,6 +436,18 @@ write('Type help. load. solve. or quit.'), nl,
 write('at the prompt. Notice the period after each command!'),nl,!.
 
 do(quit).
+
+%%%%%%%%%% Q4 %%%%%%%%%%%%%%%%
+do(goal) :-
+  write('Enter the new goal, followed by a period: '),
+  read_sentence(Y),
+  process(['goal:'|Y]),!.
+
+%%%%%%%%%% Q5 %%%%%%%%%%%%%%%%
+do(new_rule) :-
+  write('Enter a new rule, followed by a period: '),
+  read_sentence(Y),
+  process(['rule:'|Y]),!.
 
 do(X):-
 write(X),
