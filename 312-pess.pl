@@ -404,6 +404,44 @@ bug(X) :- write(X).
 %% 312pess-grammar.pl (which allows that file to run independently of
 %% 312pess.pl).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%      Main- Q2: main (based on Amzi's Clam shell)    %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+main :-
+greeting,
+repeat, 
+write('> '), 
+read(X), 
+do(X), 
+X == quit.
+
+greeting :-
+write('This is the CPSC312 Prolog Expert System Shell.'), nl,
+write('Based on Amzi''s "native Prolog shell".'), nl,
+write('Type help. load. solve. or quit.'), nl,
+write('at the prompt. Notice the period after each command!'), nl.
+
+do(load):-
+write('Enter file name in single quotes, followed by a period'), nl,
+write('(e.g ''bird.kb''.):'), nl,
+read(F),
+load_rules(F),!.
+
+do(solve):- solve,!.
+
+do(help):-
+write('Type help. load. solve. or quit.'), nl,
+write('at the prompt. Notice the period after each command!'),nl,!.
+
+do(quit).
+
+do(X):-
+write(X),
+write(' is not a legal command.'), nl,
+fail.
+
+
 %%%%%%%%%%%%%%%%% BONUS Q2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -415,4 +453,8 @@ list :- write('There are no rules loaded').
 % Recursively calls bug on each element of the list
 ls([]).
 ls([Z|Zs]) :- bug([Z]), ls(Zs).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                   End of Main- Q2                   %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
