@@ -101,7 +101,7 @@ stem_helper(T,L2),!.
 
 
 % (helper) get every possible part of speech for a word as a list from wordnet
-getpartofspeech(X, Y):- 
+getpartofspeech(X, Y):-
 findall(_partofspeech, s(_,_,X,_partofspeech,_,_), Y).
 
 % (helper) making a list of the word with all its parts of speech in the form of partofspeech(word).
@@ -113,9 +113,9 @@ parse_list(W,T,T2),!.
 % (helper) convert word and its part of speech into the form partofspeech(X).
 build_vocab(X, n, n(X)).
 build_vocab(X, v, v(X)).
-build_vocab(X, adj, adj(X)).
+build_vocab(X, a, adj(X)).
 build_vocab(X, s, adj(X)).
-build_vocab(X, adv, adv(X)).
+build_vocab(X, r, adv(X)).
 
 % (helper) converts arg X,Y into a functor X(Y)
 parse_xy(X,Y,A) :- functor(A,X,1), arg(1,A,Y).
@@ -143,6 +143,7 @@ assert_all([H|T]):-
 assert(H),
 assert_all(T).
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%               End of Main- Q6                  %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -151,7 +152,7 @@ assert_all(T).
 
 % Read a sentence (rule).
 read_sentence(_) :- peek_char(Ch), Ch = 'end_of_file', !, fail.
-read_sentence(S) :- read_sent_helper(S), expand_vocab(S),!.
+read_sentence(S) :- read_sent_helper(S),expand_vocab(S).
 
 % Read a sentence as individual words.
 read_sent_helper([]) :- peek_char(Ch),       % Stop at end of file.
