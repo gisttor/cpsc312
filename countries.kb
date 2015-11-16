@@ -1,0 +1,36 @@
+rule:
+if   it is enclosed
+then its type is landlocked.
+
+rule:
+if it has a coastline
+then its type is not-landlocked.
+
+rule:
+if   its type is landlocked and
+     it is south-american and
+     it is bordered-by-peru
+then it is bolivia.
+
+rule:
+if   its type is landlocked and
+     it is south-american
+then it is paraguay.
+
+rule:
+if   its type is not-landlocked and
+     it is south-american and
+     it is big
+then it is brazil.
+
+rule:
+if   its type is not-landlocked and
+     it is south-american and
+     it is independent and
+     it is small
+then it is suriname.
+
+rule:
+if   its type is not-landlocked and
+     it is big
+then it is canada.

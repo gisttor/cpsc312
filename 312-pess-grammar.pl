@@ -828,6 +828,20 @@ n(bird).
 n(throat).
 n(insects).
 
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Main q1 - Start %%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+n(type).
+n(paraguay).
+n(coastline).
+n(bolivia).
+n(brazil).
+n(suriname).
+n(canada).
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Main q1 - End %%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+
 % Adverbs.
 :- dynamic(adv/1).  % Ensure that the predicate can be modified dynamically
 
@@ -875,6 +889,24 @@ adj(brown).
 adj('v-shaped').
 adj(rusty).
 adj(square).
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Main q1 - Start %%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+adj(enclosed).
+adj(landlocked).
+adj('not-landlocked').
+adj('bordered-by-peru').
+adj('south-american').
+adj(big).
+adj(small).
+adj(independent).
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Main q1 - End %%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
 
 % Doing verbs (i.e., not is/are or has/have/contains/contain).
 :- dynamic(v/1).  % Ensure that the predicate can be modified dynamically

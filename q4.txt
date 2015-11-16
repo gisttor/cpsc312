@@ -1,0 +1,23 @@
+To allow the user to set the top level goal from the interpreter loop, assertz(rule(top_goal(X), [attr(is_a, X, [])])). was removed from the clear_db predicate and a new predicate was created:
+
+goal :-
+  write('Enter the new goal, followed by a period: '),
+  read_sentence(Y),
+  process(['goal:'|Y]).
+
+Example:
+?- goal.
+Enter the new goal, followed by a period: what the heck is THAT.
+Understood: rule(top_goal(_G312),[attr(is_a,_G312,[])]) 
+true.
+
+?- solve.
+Would you say that it has external tubular nostrils ?> no.
+Would you say that it has webbed feet ?> |: no.
+Would you say that it eats meat ?> |: no.
+Would you say that it has one long backward toe ?> |: yes.
+Would you say that it has flat bill ?> |: yes.
+Would you say that it eats flying insects ?> |: yes.
+Would you say that it has long rusty tail ?> |: yes.
+The answer is great crested flycatcher
+true .
