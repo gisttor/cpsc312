@@ -404,7 +404,15 @@ bug(X) :- write(X).
 %% 312pess-grammar.pl (which allows that file to run independently of
 %% 312pess.pl).
 
+%%%%%%%%%%%%%%%%% BONUS Q2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Lists all the rules that are loaded in the form rule(X,Y) and use the
+% predicate bug to print them out in natural language.
+list :- current_predicate(rule/2), !, findall(rule(X,Y), rule(X,Y), Z), ls(Z), !.
+list :- write('There are no rules loaded').
 
-
+% Recursively calls bug on each element of the list
+ls([]).
+ls([Z|Zs]) :- bug([Z]), ls(Zs).
 
