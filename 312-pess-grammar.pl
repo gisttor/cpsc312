@@ -69,8 +69,8 @@
 
 % (q6 main function- expand_vocab) if you input a sentence into the program, 
 % (1) it will first produce a list of all the stems for each word in the sentence. 
-% The second step is that it will go through the list of stems and produce a list of 
-% stems with all their parts of speech. In the last step, the function asserts 
+% (2) The second step is that it will go through the list of stems and produce a list of 
+% stems with all their parts of speech. (3) In the last step, the function asserts 
 % everything in the list, and return the list as well.
 expand_vocab([]).
 expand_vocab([H|T]):-
@@ -107,8 +107,8 @@ findall(_partofspeech, s(_,_,X,_partofspeech,_,_), Y).
 % (helper) making a list of the word with all its parts of speech in the form of partofspeech(word).
 parse_list(W,[],[]).
 parse_list(W,[H|T],[A|T2]):-
-    build_vocab(W, H, A),
-    parse_list(W,T,T2),!.
+build_vocab(W, H, A),
+parse_list(W,T,T2),!.
 
 % (helper) convert word and its part of speech into the form partofspeech(X).
 build_vocab(X, n, n(X)).
@@ -143,15 +143,17 @@ assert_all([H|T]):-
 assert(H),
 assert_all(T).
 
+% added expansion functionality to read_sentence
+% Read a sentence (rule).
+read_sentence(_) :- peek_char(Ch), Ch = 'end_of_file', !, fail.
+
+% added expand_vocab(S) to the end, so that new words can be added when reading
+% the input sentence.
+read_sentence(S) :- read_sent_helper(S), expand_vocab(S). % <------ 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%               End of Main- Q6                  %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% added expansion functionality to read_sentence
-
-% Read a sentence (rule).
-read_sentence(_) :- peek_char(Ch), Ch = 'end_of_file', !, fail.
-read_sentence(S) :- read_sent_helper(S), expand_vocab(S).
 
 % Read a sentence as individual words.
 read_sent_helper([]) :- peek_char(Ch),       % Stop at end of file.

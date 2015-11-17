@@ -408,6 +408,8 @@ bug(X) :- write(X).
 %%      Main- Q2: main (based on Amzi's Clam shell)    %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% an interpreter shell with the main command: main taking in commands:
+load., solve., help., and quit.
 main :-
 greeting,
 repeat, 
@@ -416,23 +418,28 @@ read(X),
 do(X), 
 X == quit.
 
+% greets the user by printing lines of greeting and shows the callable commands.
 greeting :-
 write('This is the CPSC312 Prolog Expert System Shell.'), nl,
 write('Based on Amzi''s "native Prolog shell".'), nl,
 do(help).
 
+% loads the input knowledge base
 do(load):-
 write('Enter file name in single quotes, followed by a period'), nl,
 write('(e.g ''bird.kb''.):'), nl,
 read(F),
 load_rules(F),!.
 
+% executes the solving part of the program
 do(solve):- solve,!.
 
+% shows the callable commands.
 do(help):-
 write('Enter the command: help. load. solve. goal. new_rule. list. or quit.'), nl,
 write('at the prompt. Notice the period after each command!'),nl,!.
 
+% allow user to quit the program by typing quit.
 do(quit).
 
 %%%%%%%%%% Q4 %%%%%%%%%%%%%%%%
