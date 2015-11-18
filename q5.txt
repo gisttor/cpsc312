@@ -1,27 +1,24 @@
-To allow the user to assert new facts and rules we simply create a new predicate:
+To allow the user to assert new facts and rules we simply create a pattern for the "do" predicate:
 
-new_rule :-
+do(new_rule) :-
   write('Enter a new rule, followed by a period: '),
   read_sentence(Y),
-  process(['rule:'|Y]).
+  process(['rule:'|Y]),!.
 
 Example:
 
-?- new_rule.
+> new_rule.
 Enter a new rule, followed by a period: if its neck is medium then it is goose.
-Understood: if it has medium neck then it is goose 
-true.
-
-?- goal.
+[if,its,neck,is,medium,then,it,is,goose]Understood: if it has medium neck then it is goose 
+> |: goal.
 Enter the new goal, followed by a period: what is it.
-Understood: rule(top_goal(_G288),[attr(is_a,_G288,[])]) 
-true.
-
-?- solve.
-Would you say that it has external tubular nostrils ?> no.
+Understood: rule(top_goal(_G285),[attr(is_a,_G285,[])]) 
+> |: solve.
+Would you say that it has external tubular nostrils ?> |: no.
 Would you say that it has webbed feet ?> |: no.
 Would you say that it eats meat ?> |: no.
 Would you say that it has one long backward toe ?> |: no.
 Would you say that it has medium neck ?> |: yes.
 The answer is goose
-true .
+
+This works very similarly to question 5, we just use a differnt pattern for the process predicate.
