@@ -409,7 +409,7 @@ bug(X) :- write(X).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % an interpreter shell with the main command: main taking in commands:
-load., solve., help., and quit.
+% load., solve., help., and quit.
 main :-
 greeting,
 repeat, 
