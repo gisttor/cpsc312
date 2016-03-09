@@ -1,0 +1,22 @@
+The domain choosen is a tiny subset of the countries of the World. The database can identify four countries, Bolivia, Paraguay, Brazil, Suriname and Canada by some very simple features.
+
+The only problem encounterd while creating the database was properly formating the rules and identifying the word types of each word. This was a small hump to get over for someone who is not a native speaker but after that, creating the database was straight forward.
+
+The word type definitions that we needed to add to 312-pess-grammer.pl were:
+
+n(type).
+n(paraguay).
+n(coastline).
+n(bolivia).
+n(brazil).
+n(suriname).
+n(canada).
+
+adj(enclosed).
+adj(landlocked).
+adj('not-landlocked').
+adj('bordered-by-peru').
+adj('south-american').
+adj(big).
+adj(small).
+adj(independent).

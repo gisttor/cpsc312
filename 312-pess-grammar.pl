@@ -58,9 +58,102 @@
 % lists of Prolog atoms.  (For those who know the term, this is a
 % cheap lexical analyzer.)
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Main- Q6: Added expanding vocab funtionality  %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Load ProNTo_Morph module
+:- ensure_loaded('Schlachter/pronto_morph_engine').
+
+% Import the s files.
+:- ensure_loaded('wn_s').
+
+% (q6 main function- expand_vocab) if you input a sentence into the program, 
+% (1) it will first produce a list of all the stems for each word in the sentence. 
+% (2) The second step is that it will go through the list of stems and produce a list of 
+% stems with all their parts of speech. (3) In the last step, the function asserts 
+% everything in the list, and return the list as well.
+expand_vocab([]).
+expand_vocab([H|T]):-
+addword(H),
+expand_vocab(T).
+
+
+% (helper) add each word to the dictionary
+%,_listofstemswithpartofspeech
+addword(_word):-
+allstems(_word,_stemlist),
+allstemswithpartofspeech(_stemlist,_listofstemswithpartofspeech),
+assert_all(_listofstemswithpartofspeech).
+
+
+% (step1.main) get all the possible stems from a word without extra parts.
+allstems(W,L2):-
+morph_atoms_bag(W, L),
+stem_helper(L,L2).
+
+% (helper) remove extra parts from the the possible stems.
+% ex. [[[testing]],[[test, -ing]],[teste, -ing]] --> [testing, test, teste]
+stem_helper([],[]).
+stem_helper([[[X]|[]]|T], [X|L2]):-
+stem_helper(T,L2),!.
+stem_helper([[[X,Y]|[]]|T], [X|L2]):-
+stem_helper(T,L2),!.
+
+
+% (helper) get every possible part of speech for a word as a list from wordnet
+getpartofspeech(X, Y):- 
+findall(_partofspeech, s(_,_,X,_partofspeech,_,_), Y).
+
+% (helper) making a list of the word with all its parts of speech in the form of partofspeech(word).
+parse_list(W,[],[]).
+parse_list(W,[H|T],[A|T2]):-
+build_vocab(W, H, A),
+parse_list(W,T,T2),!.
+
+% (helper) convert word and its part of speech into the form partofspeech(X).
+build_vocab(X, n, n(X)).
+build_vocab(X, v, v(X)).
+build_vocab(X, a, adj(X)).
+build_vocab(X, s, adj(X)).
+build_vocab(X, r, adv(X)).
+
+% (helper) converts arg X,Y into a functor X(Y)
+parse_xy(X,Y,A) :- functor(A,X,1), arg(1,A,Y).
+
+% (main) build a list of same stem with different parts of speech.
+build_vocab_list(W, L):-
+getpartofspeech(W, Y),
+parse_list(W,Y,L).
+
+% (helper) appends lists
+append([],L,L). 
+append([H|T],L2,[H|L3])  :-  append(T,L2,L3).
+
+% (step2.main) all the stems with all their parts of speech as a list
+% ex. [testing, teste, test] --> [n(testing), n(teste), v(teste), n(test), v(test)]
+allstemswithpartofspeech([],[]).
+allstemswithpartofspeech([H|T],L2):-
+build_vocab_list(H, L),
+append(L,Acc,L2),
+allstemswithpartofspeech(T,Acc),!.
+
+% (step3. main) asserting all the elements of the list to expand the vocabulary
+assert_all([]).
+assert_all([H|T]):-
+assert(H),
+assert_all(T).
+
+% added expansion functionality to read_sentence
 % Read a sentence (rule).
 read_sentence(_) :- peek_char(Ch), Ch = 'end_of_file', !, fail.
-read_sentence(S) :- read_sent_helper(S).
+
+% added expand_vocab(S) to the end, so that new words can be added when reading
+% the input sentence.
+read_sentence(S) :- read_sent_helper(S), expand_vocab(S). % <------ 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%               End of Main- Q6                  %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Read a sentence as individual words.
 read_sent_helper([]) :- peek_char(Ch),       % Stop at end of file.
@@ -69,6 +162,10 @@ read_sent_helper([]) :- peek_char(Ch),       % Stop at a period.
         Ch = '.', !, get_char(Ch).
 read_sent_helper(Words) :- peek_char(Ch),    % Eat whitespace
         char_type(Ch, space), !, get_char(Ch), 
+        read_sent_helper(Words).
+read_sent_helper(Words) :- peek_char(Ch),    % Eat comments
+        Ch = '%', !, get_char(Ch),           % starting from %
+        discard_to_eol(),                    % to the end of line
         read_sent_helper(Words).
 read_sent_helper([Word|Words]) :-            % Read quoted words.
         peek_char(Ch), Ch = '"', !,
@@ -79,6 +176,9 @@ read_sent_helper([Word|Words]) :-            % Read unquoted words.
         read_word(ChWord), 
         atom_chars(Word, ChWord), 
         read_sent_helper(Words).
+
+% Read and discard everything until end of line
+discard_to_eol() :- read_word_to('\n', _).
 
 % Read a word taking the next character read as a delimiter.
 % For example, if the input is "|hello world! 'what's new?| with you?"
@@ -94,7 +194,8 @@ read_word_to(Stop, [C|Cs]) :- get_char(C), read_word_to(Stop, Cs).
 read_word([]) :- peek_char(Ch), char_type(Ch, space), !.
 read_word([]) :- peek_char(Ch), Ch = '.', !.
 read_word([]) :- peek_char(Ch), char_type(Ch, end_of_file), !.
-read_word([Ch|Chs]) :- get_char(Ch), read_word(Chs).
+% convert to lower case when reading char
+read_word([Lc|Chs]) :- get_char(Ch),downcase_atom(Ch,Lc), read_word(Chs).
 
 
 
@@ -158,6 +259,9 @@ try_parse :- try_parse(P),
 
 % Debugging predicate for quick test parsing of a rule.
 try_parse(P) :- read_sentence(Sent), rule(P, Sent, []).
+
+% Debugging predicate for quick test parsing of a goal.
+try_goal(P) :- read_sentence(Sent), goal(P, Sent, []).
 
 %% A sample parsed sentence for testing.  Should mean:
 %% It very slowly and carefully eats languidly flying very very 
@@ -232,6 +336,144 @@ ind --> [a]; [an]; [].
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% Part 3 - end %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%% Main q3 %%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Load ProNTo_Morph module
+:- ensure_loaded('Schlachter/pronto_morph_engine').
+
+% Converts the base form verb (Base) to the doing form, as it's given in v(X),
+% using the ProNTo Morph engine.
+% Intended to be used with Base ground and Doing unground
+% Search all the verbs and match if they have a [Base,-s] morpheme
+baseToDoingVerb(Base,Doing) :- v(Doing), morph_atoms(Doing, [[Base, -s]]).
+
+% Optional usage for "the hell" or "the heck"
+opt_the_hell --> [].
+opt_the_hell --> [the,hell];[the,heck].
+
+% Goals can be
+goal(Goal) --> % what is it
+        % Optional "the hell/the heck" usage for bonus
+        % "that" is added to np([]) vocab below.
+        % read_sentence translates input to all lower case above
+        % in read_word/1
+        [what], opt_the_hell, vis, np([]),
+        { build_goal(X, [attr(is_a, X, [])], Goal) }, !.
+    % answer to goal is the "it"
+    % ?- process(['goal:',what,is,it]).
+    % Understood: [rule(top_goal(_G2216),[attr(is_a,_G2216,[])])]
+    %
+    % ?- try_goal(X).
+    % what the heck is THAT.
+    %
+    % X = [rule(top_goal(_G393), [attr(is_a, _G393, [])])]
+
+goal(Goal) -->
+        % what does it have
+        [what, does], np([]), vhas,
+        { build_goal(X, [attr(has_a, X, [])], Goal) }, !.
+    % ?- process(['goal:',what,does,it,have]).
+    % Understood: [rule(top_goal(_G2264),[attr(has_a,_G2264,[])])]
+
+goal(Goal) -->
+        % is it <np/adjp>
+        vis, np([]), isitqp(Body),
+        { build_goal(yes, Body, Goal) }, !.
+    % answer/goal to "is it.." is always yes or no
+    % ?- process(['goal:',is,it,a,brown,swan]).
+    % Understood: [rule(top_goal(yes),[attr(is_a,swan,[attr(is_like,brown,[])])])]
+
+goal(Goal) -->
+        % does it <vp>
+        [does], np([]), doesqp(Body),
+        { build_goal(yes, Body, Goal) }, !.
+    % answer/goal to "does it ..." is always yes or no
+    % ?- process(['goal:',does,it,eat,nostrils]).
+    % Understood: [rule(top_goal(yes),[attr(does,eats,[attr(is_a,nostrils,[])])])]
+
+goal(Goal) -->
+        % what does it <v (base form)>
+        [what, does], np([]), vdo([attr(does,X,[])]),
+        { build_goal(Y, [attr(does,X, [attr(is_a,Y,[])])], Goal) }, !.
+    % answer/goal to "what does it ..." is the subject of a "does" attribute
+    % ?- process(['goal:',what,does,it,scavenge]).
+    % Understood: [rule(top_goal(_G2391),[attr(does,scavenges,[attr(is_a,_G2391,[])])])]
+
+goal(Goal) -->
+        % how does it <v (base form)>
+        [how, does], np([]), vdo([attr(does,X,[])]),
+        { build_goal(Y, [attr(does,X, [attr(is_how,Y,[])])], Goal) }, !.
+    % answer to "how does it .." is the attribute belonging to is_how
+    % ?- process(['goal:',how,does,it,fly]).
+    % Understood: [rule(top_goal(_G2313),[attr(does,flies,[attr(is_how,_G2313,[])])])]
+
+goal(Goal) -->
+        % what is the <np> like
+        %
+        % If the np includes an is_like relation, like flying toe, we take it to
+        % describe the toe, other than that it's flying. i.e., flying would not be
+        % a solution as below (unless if there's somehow two is_like attributes)
+        [what], vis, np(NP), [like],
+        { build_prepend_attrs(NP,[attr(is_like,Y,[])], LikeTerm), build_goal(Y, LikeTerm, Goal) }, !.
+    % ?- process(['goal:',what,is,the,throat,like]).
+    % Understood: rule(top_goal(_G869),[attr(is_a,throat,[attr(is_like,_G869,[])])])
+    %
+    % ?- process(['goal:',what,is,the,flying,toe,like]).
+    % Understood: rule(top_goal(_G916),[attr(is_a,toe,[attr(is_like,flying,[]),attr(is_like,_G916,[])])])
+
+% Helper function that builds the goal using rule syntax.
+% top_goal(X) is the head we want to prove and
+% Y is the body (the attribute, taken as in
+build_goal(X, Y, R) :- build_rules(Y, [top_goal(X)], R).
+
+% Base for of "Doing" verbs provided below or literals
+% E.g. vdo(eat) uses v(eats) and vdo(fly) uses v(flies)
+% No translation for literal values. Assume it makes sense to use in the form
+% provided
+vdo([attr(does,Doing,[])]) --> [X], { baseToDoingVerb(X, Doing) }.
+vdo([attr(does,Name,[])]) --> lit(v, Name).
+
+%%%%%%%%%%%%%%%%%%% DOES %%%%%%%%%%%%%%%%%%
+
+doesqp(VPTerms) -->           % Does it has or it contains
+        vhas,
+        np_conj(NPTerms),       % The noun should be has_a, not is_a
+        { convert_to_has_a(NPTerms, VPTerms) }.
+    % Example: Does it have a toe
+
+doesqp(VPTerms) -->    % Does it advs verb nouns
+    % These all get translated to attr(does,verb,[_]) (vdoes)
+    adv_conj(AVTerms),          % E.g., It slowly eats worms.
+    vdo(VTerms),                % All the attached attributes just
+    np_conj(NPTerms),           % get thrown together on the verb.
+    { append(AVTerms, NPTerms, ModTerms),
+      build_prepend_attrs(VTerms, ModTerms, VPTerms) }.
+  % Example: does it very slowly eats
+
+doesqp(VPTerms) -->
+    vdo(VTerms),                % It verb advs.
+    adv_conj_plus(AVTerms),     % E.g., it eats slowly.
+    { build_prepend_attrs(VTerms, AVTerms, VPTerms) }.
+
+%%%%%%%%%%%%%%%%%%%% IS IT %%%%%%%%%%%%%%%%%
+
+isitqp(VPTerms) -->
+        % Is it w/adjectives.
+        adj_conj_plus(VPTerms).
+    % Example: is it external
+
+isitqp(VPTerms) -->
+        % Is it w/nouns (which can also have adjs).
+        np_conj_plus(VPTerms).
+    % Example: is it a flying toe
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Main q3 - End %%%%
 %%%%%%%%%%%%%%%%%%%%%%%%
 
 % 1 or more sentences joined by ands.
@@ -380,7 +622,7 @@ det_opt --> [a].
 det_opt --> [an].
 
 % Nouns become is_a attributes.
-n([]) --> [it].                           % "it" is ignored
+n([]) --> [it]; [that].                   % "it", "that" are ignored
 n([attr(is_a,X,[])]) --> [X], { n(X) }.   % Anything listed below.
 n([attr(is_a,Name,[])]) --> lit(n, Name). % Any literal tagged as 'n'
 
@@ -679,6 +921,20 @@ n(bird).
 n(throat).
 n(insects).
 
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Main q1 - Start %%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+n(type).
+n(paraguay).
+n(coastline).
+n(bolivia).
+n(brazil).
+n(suriname).
+n(canada).
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Main q1 - End %%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+
 % Adverbs.
 :- dynamic(adv/1).  % Ensure that the predicate can be modified dynamically
 
@@ -690,7 +946,6 @@ adv(ponderously).
 adv(powerfully).
 adv(agilely).
 adv(mottled).
-
 % Adjectives.
 :- dynamic(adj/1).  % Ensure that the predicate can be modified dynamically
 
@@ -727,6 +982,24 @@ adj(brown).
 adj('v-shaped').
 adj(rusty).
 adj(square).
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Main q1 - Start %%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+adj(enclosed).
+adj(landlocked).
+adj('not-landlocked').
+adj('bordered-by-peru').
+adj('south-american').
+adj(big).
+adj(small).
+adj(independent).
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Main q1 - End %%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
 
 % Doing verbs (i.e., not is/are or has/have/contains/contain).
 :- dynamic(v/1).  % Ensure that the predicate can be modified dynamically

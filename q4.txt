@@ -1,0 +1,35 @@
+To allow the user to set the top level goal from the interpreter loop, assertz(rule(top_goal(X), [attr(is_a, X, [])])). was removed from the clear_db predicate and a new pattern for the "do" predicate was created:
+
+do(goal) :-
+  write('Enter the new goal, followed by a period: '),
+  read_sentence(Y),
+  process(['goal:'|Y]),!.
+
+Example:
+
+?- main.
+This is the CPSC312 Prolog Expert System Shell.
+Based on Amzi's "native Prolog shell".
+Type help. load. solve. or quit.
+at the prompt. Notice the period after each command!
+> load.
+Enter file name in single quotes, followed by a period
+(e.g 'bird.kb'.):
+|: 'bird.kb'
+[...]
+> |: goal.
+Enter the new goal, followed by a period: what the heck is THAT.
+Understood: rule(top_goal(_G88),[attr(is_a,_G88,[])]) 
+
+?- solve.
+Would you say that it has external tubular nostrils ?> no.
+Would you say that it has webbed feet ?> |: no.
+Would you say that it eats meat ?> |: no.
+Would you say that it has one long backward toe ?> |: yes.
+Would you say that it has flat bill ?> |: yes.
+Would you say that it eats flying insects ?> |: yes.
+Would you say that it has long rusty tail ?> |: yes.
+The answer is great crested flycatcher
+true .
+
+The "do" predicate with the pattern "goal" uses "write" to write instructions on the shell, read_sentence to read what the user types and the process predicate that was created for question 3. The process predicate then parses and asserts the new goal.

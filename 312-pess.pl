@@ -362,6 +362,22 @@ process(['words:'|L]) :-    % Found words
 %%%%% Part 3 - end %%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%% Main q3 %%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Process goals and set it as the top-goal. Retract any other top-goal from the
+    % database
+process(['goal:'|L]) :-     % Found a goal
+        goal(G,L,[]),       % Parse the goal
+        bug(G),             % Print it for debugging.
+        retractall(rule(top_goal(_), _)), % Retract any other top goal
+        assert_rules(G), !. % Assert it (them, potentially) in the DB.
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Main q3  end %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+%
 process(L) :-
         write('trans error on:'),nl,
         write(L),nl.
@@ -374,9 +390,9 @@ assert_rules([R|Rs]) :- assertz(R), assert_rules(Rs).
 % Also establishes the default top goal (to find out what "it" is).
 clear_db :-
         abolish(rule,2),
-        dynamic(rule/2),
+        dynamic(rule/2).
         %% For now, top_goal is set manually.
-        assertz(rule(top_goal(X), [attr(is_a, X, [])])).
+        %% assertz(rule(top_goal(X), [attr(is_a, X, [])])).
 
 % Gloss a rule for debugging output.
 bug(X) :- write('Understood: '), 
@@ -388,7 +404,86 @@ bug(X) :- write(X).
 %% 312pess-grammar.pl (which allows that file to run independently of
 %% 312pess.pl).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%      Main- Q2: main (based on Amzi's Clam shell)    %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% an interpreter shell with the main command: main taking in commands:
+% load., solve., help., and quit.
+main :-
+greeting,
+repeat, 
+write('> '), 
+read(X), 
+do(X), 
+X == quit.
 
+% greets the user by printing lines of greeting and shows the callable commands.
+greeting :-
+write('This is the CPSC312 Prolog Expert System Shell.'), nl,
+write('Based on Amzi''s "native Prolog shell".'), nl,
+do(help).
 
+% loads the input knowledge base
+do(load):-
+write('Enter file name in single quotes, followed by a period'), nl,
+write('(e.g ''bird.kb''.):'), nl,
+read(F),
+load_rules(F),!.
 
+% executes the solving part of the program
+do(solve):- solve,!.
+
+% shows the callable commands.
+do(help):-
+write('Enter the command: help. load. solve. goal. new_rule. list. or quit.'), nl,
+write('at the prompt. Notice the period after each command!'),nl,!.
+
+% allow user to quit the program by typing quit.
+do(quit).
+
+%%%%%%%%%% Q4 %%%%%%%%%%%%%%%%
+do(goal) :-
+  write('Enter the new goal, followed by a period: '),
+  read_sentence(Y),
+  process(['goal:'|Y]),!.
+
+%%%%%%%%%% Q5 %%%%%%%%%%%%%%%%
+do(new_rule) :-
+  write('Enter a new rule, followed by a period: '),
+  read_sentence(Y),
+  process(['rule:'|Y]),!.
+
+%%%%%%%%%%%%%%%%% BONUS Q2 %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Lists all the rules that are loaded in the form rule(X,Y) and prints it out
+% in natural language. If there are no rules, print out "There are no rules
+% loaded". If there is, then find and print them all
+%
+% It checks to see if rule/2 is defined and if there are any rules loaded.
+% Trying to query rule(_,_) when the predicate is not defined will result in an
+% error.
+do(list) :- current_predicate(rule/2), rule(_,_), !, findall(rule(X,Y),
+rule(X,Y), Z), ls(Z), !.
+do(list) :- write('There are no rules loaded'), nl, !.
+
+% Recursively calls bug on each element of the list
+ls([]).
+ls([Z|Zs]) :- print_rule([Z]), ls(Zs).
+
+print_rule(X) :- write('Rule: '),
+        plain_gloss(X, Text),
+        write_sentence(Text), nl.
+
+%%%%%%%%%%%%%%% END BONUS 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+:- discontiguous do/1.
+do(X):-
+    write(X),
+    write(' is not a legal command.'), nl,
+    fail.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                   End of Main- Q2                   %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
