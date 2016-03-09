@@ -1,4 +1,4 @@
-To allow the user to assert new facts and rules we simply create a pattern for the "do" predicate:
+To allow the user to assert new facts and rules we simply create a new pattern for the "do" predicate:
 
 do(new_rule) :-
   write('Enter a new rule, followed by a period: '),
